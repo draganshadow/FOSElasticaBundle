@@ -53,10 +53,14 @@ class ElasticaToModelTransformerCollection implements ElasticaToModelTransformer
         $transformed = array();
         foreach ($sorted AS $type => $objects) {
             $transformedObjects = $this->transformers[$type]->transform($objects);
+            $identifier = $this->transformers[$type]->getIdentifierField();
             $identifierGetter = 'get' . ucfirst($this->transformers[$type]->getIdentifierField());
             $transformed[$type] = array_combine(
                 array_map(
-                    function($o) use ($identifierGetter) {
+                    function($o) use ($identifier, $identifierGetter) {
+                        if (is_array($o)) {
+                            return $o[$identifier];
+                        }
                         return $o->$identifierGetter();
                     },
                     $transformedObjects
